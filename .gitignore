@@ -24,3 +24,9 @@ _testmain.go
 *.test
 *.prof
 
+data
+*.sublime-project
+*.sublime-workplace
+
+data
+doc
