@@ -1,30 +1,16 @@
 package main
 
 import (
-	"log"
-	"reflect"
+	// "log"
+	"mervin.me/Scamper4Go/utils"
 )
 
-type ListRecord struct {
-	WListId     uint32
-	PListId     uint32
-	ListName    string
-	Description string
-	MonitorName string
-}
-
 func main() {
-	list := ListRecord{
-		WListId:     1,
-		PListId:     2,
-		ListName:    "a",
-		Description: "b",
-		MonitorName: "c",
-	}
-	t := reflect.TypeOf(list)
-	v := reflect.ValueOf(list)
-	for i := 0; i < t.NumField(); i++ {
-		log.Printf("%s--%v--%v", t.Field(i).Name, t.Field(i).Type.Name(), v.Field(i).Interface())
-	}
-
+	// utils.AnalysisDump("./data/test.warts.creating")
+	// utils.AnalysisDump("./data/test2.warts.creating")
+	// utils.AnalysisDump("./data/test3.warts.creating")
+	// utils.AnalysisDump("./data/test4.warts.creating")
+	utils.AnalysisDump("./data/test.txt", "./data/test.warts.creating")
+	// utils.AnalysisDump("./data/test2.gz")
+	// utils.AnalysisDump("./data/test3.gz")
 }

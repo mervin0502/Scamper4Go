@@ -2,9 +2,10 @@ package warts
 
 import (
 	"errors"
+	"io"
 	"log"
-	"os"
 	"reflect"
+	// "unsafe"
 )
 
 //
@@ -15,14 +16,16 @@ var (
 
 type Flags struct {
 	Flag []uint8
-	fp   *os.File
+	fp   io.Reader
+	// addr *Address
 }
 
 //NewFlags
-func NewFlags(fp *os.File) *Flags {
+func NewFlags(fp io.Reader) *Flags {
 	_flags := make([]uint8, 0)
 	for {
 		_u := ReadUint8(fp)
+		// log.Printf("%x", _u)
 		var i uint8
 		for i = 1; i < 8; i++ {
 			_bit := (_u >> (i - 1)) & 0x01
@@ -39,6 +42,12 @@ func NewFlags(fp *os.File) *Flags {
 	return _obj
 }
 
+//NewFlags
+// func NewFlagsWithAddress(fp io.Reader, addr *Address) *Flags {
+// 	flags := NewFlags(fp)
+// 	// flags.addr = addr
+// 	return flags
+// }
 func (f *Flags) Parsing(opts interface{}) {
 	var s uint8
 	_flags := f.Flag
@@ -46,22 +55,27 @@ func (f *Flags) Parsing(opts interface{}) {
 		s += v
 	}
 	if s > 0 || len(_flags) >= 8 {
-		paramLen := ReadUint16(f.fp)
-		log.Println(paramLen)
-
+		ReadUint16(f.fp)
+		// log.Println(paramLen)
 		vs := reflect.ValueOf(opts).Elem()
+		// log.Println(_flags)
 		for i := 0; i < len(_flags); i++ {
 			//out of the struct field
-			log.Println(vs.NumField())
-			if i > vs.NumField() {
-				log.Println(ErrUnknownFlag)
+
+			if i >= vs.NumField() {
+				// log.Println(ErrUnknownFlag)
+				break
 			}
+
 			if _flags[i] == 0 {
 				continue
 			}
-			log.Println(vs.Field(i).Kind().String())
+			// log.Println(ts.Field(i).Name)
+			// log.Println(vs.Field(i).Type().String())
 			//
-			switch vs.Field(i).Kind().String() {
+			v := vs.Field(i)
+			// log.Println(v.Kind().String())
+			switch v.Kind().String() {
 			case "uint8":
 				vs.Field(i).SetUint(uint64(ReadUint8(f.fp)))
 				break
@@ -74,6 +88,12 @@ func (f *Flags) Parsing(opts interface{}) {
 			case "string":
 				vs.Field(i).SetString(ReadString(f.fp))
 				break
+			case "ptr":
+
+				v.Set(reflect.New(v.Type().Elem()))
+				in := make([]reflect.Value, 1)
+				in[0] = reflect.ValueOf(f.fp)
+				v.MethodByName("Parsing").Call(in)
 			default:
 				log.Panicln(ErrUnknownType)
 			}

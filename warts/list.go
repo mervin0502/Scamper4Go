@@ -1,9 +1,10 @@
 package warts
 
 import (
-	"log"
-	"os"
+	"io"
+	// "log"
 	// "reflect"
+	// "os"
 )
 
 type ListRecord struct {
@@ -23,7 +24,7 @@ func NewListRecord() *ListRecord {
 	}
 }
 
-func (l *ListRecord) Parsing(fp *os.File) {
+func (l *ListRecord) Parsing(fp io.Reader) {
 	//wlistid
 	l.WListId = ReadUint32(fp)
 	//plistid
@@ -31,7 +32,7 @@ func (l *ListRecord) Parsing(fp *os.File) {
 	// log.Println(l.PListId)
 	//listname
 	l.ListName = ReadString(fp)
-	log.Println(l.ListName)
+	// log.Println(l.ListName)
 	flags := NewFlags(fp)
 	flags.Parsing(l.Options)
 

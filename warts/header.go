@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"os"
 )
@@ -12,6 +13,9 @@ import (
 var (
 	ErrHeaderLength = errors.New("header length error.")
 	ErrHeaderFormat = errors.New("header format error")
+)
+var (
+	IsOldAddress = false
 )
 
 type ObjType uint16
@@ -22,7 +26,7 @@ const (
 	CycleDefinitionType    ObjType = 0x0003
 	CycleStopType          ObjType = 0x0004
 	AddrType               ObjType = 0x0005
-	TracerouterType        ObjType = 0x0006
+	TracerouteType         ObjType = 0x0006
 	PingType               ObjType = 0x0007
 	MDAType                ObjType = 0x0008
 	AliasType              ObjType = 0x0009
@@ -38,10 +42,13 @@ type Header struct {
 	Length      uint32
 }
 
-func NewHeader(fp *os.File) *Header {
+func NewHeader(fp io.Reader) *Header {
 	buf := make([]byte, 8)
 	n, err := fp.Read(buf)
 	if err != nil {
+		if err == io.EOF {
+			os.Exit(0)
+		}
 		log.Panicln(err)
 	}
 	if n < 8 {
@@ -58,6 +65,9 @@ func NewHeader(fp *os.File) *Header {
 	binary.Read(_buf, binary.BigEndian, &l)
 	if m != 0x1205 {
 		log.Panicln(ErrHeaderFormat)
+	}
+	if t == 0x05 {
+		IsOldAddress = true
 	}
 	_h := &Header{
 		MagicNumber: m,

@@ -1,7 +1,7 @@
 package warts
 
 import (
-	"os"
+	"io"
 	"testing"
 )
 
@@ -16,16 +16,40 @@ func Test_ReadListRecord(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	h := NewHeader(fp)
-	t.Log(h)
-	l := NewListRecord()
-	l.Parsing(fp)
-	t.Logf("%d\t%d\t%s\t%s\t%s\n", l.WListId, l.PListId, l.ListName, l.Options.Description, l.Options.MonitorName)
-	h = NewHeader(fp)
-	t.Log(h)
+	// addr := NewAddress()
+	// h := NewHeader(fp)
+	// t.Log(h)
+	// l := NewListRecord()
+	// l.Parsing(fp)
+	// t.Logf("%d\t%d\t%s\t%s\t%s\n", l.WListId, l.PListId, l.ListName, l.Options.Description, l.Options.MonitorName)
+	// h = NewHeader(fp)
+	// t.Log(h)
 
-	o := NewCycleDefinitionRecord()
+	// o := NewCycleDefinitionRecord()
 
-	o.Parsing(fp)
-	t.Logf("%d==%d==%d==%d==%d==%s\n", o.CCycleId, o.ListId, o.HCycleId, o.StartTime, o.Options.StopTime, o.Options.Hostname)
+	// o.Parsing(fp)
+	// t.Logf("%d==%d==%d==%d==%d==%s\n", o.CCycleId, o.ListId, o.HCycleId, o.StartTime, o.Options.StopTime, o.Options.Hostname)
+	// h = NewHeader(fp)
+	// t.Log(h)
+	// tr := NewTracerouteRecord()
+	// tr.Parsing(fp)
+	// t.Logf("%v", tr.Options.Time)
+	for {
+
+		h := NewHeader(fp)
+		switch h.TypeValue {
+		case ListType:
+			l := NewListRecord()
+			l.Parsing(fp)
+		case CycleStartType:
+		case CycleDefinitionType:
+			o := NewCycleDefinitionRecord()
+			o.Parsing(fp)
+		case TracerouteType:
+			tr := NewTracerouteRecord()
+			tr.Parsing(fp)
+		default:
+
+		}
+	}
 }

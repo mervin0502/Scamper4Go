@@ -1,7 +1,7 @@
 package warts
 
 import (
-	"os"
+	"io"
 	"testing"
 )
 

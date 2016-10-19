@@ -2,7 +2,7 @@ package warts
 
 import (
 	// "log"
-	"os"
+	"io"
 )
 
 type CycleStartRecord struct {
@@ -54,7 +54,7 @@ func NewCycleDefinitionRecord() *CycleDefinitionRecord {
 }
 
 //Parsing
-func (c *CycleStartRecord) Parsing(fp *os.File) {
+func (c *CycleStartRecord) Parsing(fp io.Reader) {
 	//cCycleId
 	c.CCycleId = ReadUint32(fp)
 	//listId
@@ -70,7 +70,7 @@ func (c *CycleStartRecord) Parsing(fp *os.File) {
 }
 
 //Parsing
-func (c *CycleDefinitionRecord) Parsing(fp *os.File) {
+func (c *CycleDefinitionRecord) Parsing(fp io.Reader) {
 	//cCycleId
 	c.CCycleId = ReadUint32(fp)
 	//listId
