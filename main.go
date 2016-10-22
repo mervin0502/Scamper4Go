@@ -2,15 +2,18 @@ package main
 
 import (
 	// "log"
-	"mervin.me/Scamper4Go/utils"
+	"mervin.me/Scamper4Go/extract"
 )
 
 func main() {
-	// utils.AnalysisDump("./data/test.warts.creating")
-	// utils.AnalysisDump("./data/test2.warts.creating")
-	// utils.AnalysisDump("./data/test3.warts.creating")
-	// utils.AnalysisDump("./data/test4.warts.creating")
-	utils.AnalysisDump("./data/test.txt", "./data/test.warts.creating")
-	// utils.AnalysisDump("./data/test2.gz")
-	// utils.AnalysisDump("./data/test3.gz")
+	// extract.AnalysisDump("./data/test.warts.creating")
+	// extract.AnalysisDump("./data/test2.warts.creating")
+	// extract.AnalysisDump("./data/test3.warts.creating")
+	// extract.AnalysisDump("./data/test4.warts.creating")
+	// extract.AnalysisDump("./data/test.txt", "./data/test.warts.creating")
+	// extract.AnalysisDump("./data/test.txt", "./data/test3.gz")
+	// extract.AnalysisDump("./data/test00.txt", "./data/test00.warts.creating")
+	extract.TopologyDump("./data/test00.txt", "./data/test00.warts.creating")
+	// extract.AnalysisDump("./data/test2.txt", "./data/test2.warts.creating")
+	// extract.AnalysisDump("./data/test3.gz")
 }

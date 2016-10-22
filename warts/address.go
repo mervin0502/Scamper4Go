@@ -6,6 +6,8 @@ import (
 	"io"
 	"log"
 	// "strconv"
+	"bytes"
+	"encoding/binary"
 )
 
 type AddressType uint8
@@ -105,7 +107,7 @@ func (a *Address) Parsing(fp io.Reader) {
 			for _, v1 := range v.Value {
 				a.Value = append(a.Value, v1)
 			}
-			log.Printf("search old address: %v", a.Value)
+			// log.Printf("search old address: %v", a.Value)
 		} else {
 			log.Panicln(ErrUndefinedAddress)
 		}
@@ -161,13 +163,15 @@ func (a *Address) Parsing(fp io.Reader) {
 				for _, v1 := range v.Value {
 					a.Value = append(a.Value, v1)
 				}
-				log.Printf("search defined address: %v", a.Value)
+				// log.Printf("search defined address: %v", a.Value)
 			} else {
 				log.Panicln(ErrUndefinedAddress)
 			}
 		}
 	}
 }
+
+//String
 func (a *Address) String() string {
 	// log.Println(a.Value)
 	var str string
@@ -176,66 +180,15 @@ func (a *Address) String() string {
 	}
 
 	str = str[0 : len(str)-1]
-	log.Println(str)
+	// log.Println(str)
 	return str
 }
 
-// //Parsing
-// func (a *DefinedAddress) Parsing(fp io.Reader) {
-// 	v := ReadUint8(fp)
-// 	log.Printf("address %x", v)
-// 	if v != 0 {
-// 		//defined address
-// 		_type := AddressType(ReadUint8(fp))
-// 		addr := &DefinedAddress{
-// 			Length: v,
-// 			Type:   _type,
-// 		}
-// 		var typeLen int
-// 		// log.Printf("address type %x", _type)
-// 		switch _type {
-// 		case 1:
-// 			//ipv4
-// 			typeLen = 4
-// 			break
-// 		case 2:
-// 			//ipv6
-// 			typeLen = 16
-// 			break
-// 		case 3:
-// 			//mac
-// 			typeLen = 6
-// 			break
-// 		case 4:
-// 			//firewire link address
-// 			typeLen = 8
-// 			break
-// 		default:
-// 			log.Panicln(ErrAddressType)
-// 		}
-// 		addr.Value = make([]byte, typeLen)
-// 		n, err := fp.Read(addr.Value)
-// 		if err != nil {
-// 			log.Panicln(err)
-// 		}
-// 		if n != typeLen {
-// 			log.Panicln(ErrReadAddress)
-// 		}
-// 		log.Println(addr)
-// 		AddressArr[uint32(len(AddressArr))] = addr
-// 	} else {
-// 		//ref address
-// 		ref := ReadUint32(fp)
-// 		log.Printf("%x", ref)
-// 		if v, ok := AddressArr[ref]; ok {
-
-// 			a.Length = v.Length
-// 			a.Type = v.Type
-// 			a.Value = v.Value
-// 			log.Printf("%v", a)
-// 		} else {
-// 			log.Panicln(ErrUndefinedAddress)
-
-// 		}
-// 	}
-// }
+//Uint
+func (a *Address) Uint() uint64 {
+	// log.Println(a.Value)
+	buf := bytes.NewBuffer(a.Value)
+	var i uint32
+	binary.Read(buf, binary.BigEndian, &i)
+	return uint64(i)
+}

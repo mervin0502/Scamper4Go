@@ -43,8 +43,10 @@ func ReadUint16(fp io.Reader) uint16 {
 	if err != nil {
 		log.Panicln(err)
 	}
+
 	if n != 2 {
-		log.Panicln(ErrReadUint16)
+		// log.Panicln(ErrReadUint16)
+		log.Panicf("%d=%s", n, ErrReadUint16)
 	}
 	var i uint16
 	binary.Read(bytes.NewBuffer(_byte), binary.BigEndian, &i)
