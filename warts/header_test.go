@@ -1,7 +1,7 @@
 package warts
 
 import (
-	"io"
+	"os"
 	"testing"
 )
 
@@ -37,6 +37,6 @@ func Test_NewHeader(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	h := NewHeader(f)
+	h, _ := NewHeader(f)
 	t.Log(h)
 }

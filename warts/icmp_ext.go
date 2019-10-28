@@ -4,8 +4,9 @@ import (
 	"bytes"
 	"encoding/binary"
 	"errors"
-	"io"
-	"log"
+	// "io"
+
+	// "github.com/golang/glog"
 )
 
 var (
@@ -16,6 +17,7 @@ var (
 type ICMPExtension struct {
 	Len   uint16
 	Value []*ICMPExtensionRecord
+	O    *Object
 }
 
 //ICMPExtensionRecord
@@ -27,22 +29,17 @@ type ICMPExtensionRecord struct {
 }
 
 //NewICMPExtension
-func NewICMPExtension() *ICMPExtension {
+func NewICMPExtension(obj *Object) *ICMPExtension {
 	return &ICMPExtension{
 		Value: make([]*ICMPExtensionRecord, 0),
+		O:obj,
 	}
 }
 
-func (i *ICMPExtension) Parsing(fp io.Reader) {
-	_len := ReadUint16(fp)
-	_bytes := make([]byte, _len)
-	n, err := fp.Read(_bytes)
-	if err != nil {
-		log.Panicln(err)
-	}
-	if n != len(_bytes) {
-		log.Panicln(ErrReadIncomplete)
-	}
+func (i *ICMPExtension) Parsing() {
+	_len := i.O.ReadUint16()
+	_bytes := i.O.ReadBytes(int(_len))
+	
 	buf := bytes.NewBuffer(_bytes)
 	for {
 		var _len uint16

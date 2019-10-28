@@ -6,9 +6,9 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
-	"os"
 )
+
+// "github.com/golang/glog"
 
 var (
 	ErrHeaderLength = errors.New("header length error.")
@@ -42,20 +42,14 @@ type Header struct {
 	Length      uint32
 }
 
-func NewHeader(fp io.Reader) *Header {
+func NewHeader(fp io.Reader) (*Header, error) {
 	buf := make([]byte, 8)
-	n, err := fp.Read(buf)
+	// _len := 8
+	_, err := io.ReadFull(fp, buf)
+	// err := read(fp, buf, _len)
 	if err != nil {
-		if err == io.EOF {
-			os.Exit(0)
-		}
-		log.Panicln(err)
+		return nil, err
 	}
-	if n < 8 {
-		log.Panicln(ErrHeaderLength)
-	}
-
-	//
 	_buf := bytes.NewBuffer(buf)
 	var m uint16
 	var t ObjType
@@ -63,8 +57,9 @@ func NewHeader(fp io.Reader) *Header {
 	binary.Read(_buf, binary.BigEndian, &m)
 	binary.Read(_buf, binary.BigEndian, &t)
 	binary.Read(_buf, binary.BigEndian, &l)
+	// glog.Infof("%0x \t %d \t %d", m, t, l)
 	if m != 0x1205 {
-		log.Panicln(ErrHeaderFormat)
+		return nil, ErrHeaderFormat
 	}
 	if t == 0x05 {
 		IsOldAddress = true
@@ -74,7 +69,7 @@ func NewHeader(fp io.Reader) *Header {
 		TypeValue:   t,
 		Length:      l,
 	}
-	return _h
+	return _h, nil
 }
 
 func (h *Header) String() string {

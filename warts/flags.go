@@ -2,9 +2,10 @@ package warts
 
 import (
 	"errors"
-	"io"
 	"log"
 	"reflect"
+
+	"github.com/golang/glog"
 	// "unsafe"
 )
 
@@ -16,38 +17,35 @@ var (
 
 type Flags struct {
 	Flag []uint8
-	fp   io.Reader
-	// addr *Address
+	O    *Object
 }
 
 //NewFlags
-func NewFlags(fp io.Reader) *Flags {
+func NewFlags(obj *Object) *Flags {
 	_flags := make([]uint8, 0)
 	for {
-		_u := ReadUint8(fp)
-		// log.Printf("%x", _u)
+		_u := obj.ReadUint8()
 		var i uint8
+		// glog.Infof("%d::", _u)
 		for i = 1; i < 8; i++ {
 			_bit := (_u >> (i - 1)) & 0x01
+			// glog.Infof("%d |", _bit)
 			_flags = append(_flags, _bit)
 		}
+		// glog.Infof(" \n")
 		if uint(_u>>7) == 0 {
 			break
 		}
 	}
+	// glog.Infof(" \n\n")
 	_obj := &Flags{
 		Flag: _flags,
-		fp:   fp,
+		O:    obj,
 	}
+	// glog.Infof("%d", _obj.Flag)
 	return _obj
 }
 
-//NewFlags
-// func NewFlagsWithAddress(fp io.Reader, addr *Address) *Flags {
-// 	flags := NewFlags(fp)
-// 	// flags.addr = addr
-// 	return flags
-// }
 func (f *Flags) Parsing(opts interface{}) {
 	var s uint8
 	_flags := f.Flag
@@ -55,7 +53,7 @@ func (f *Flags) Parsing(opts interface{}) {
 		s += v
 	}
 	if s > 0 || len(_flags) >= 8 {
-		ReadUint16(f.fp)
+		f.O.ReadUint16()
 		// log.Println(paramLen)
 		vs := reflect.ValueOf(opts).Elem()
 		// log.Println(_flags)
@@ -70,30 +68,35 @@ func (f *Flags) Parsing(opts interface{}) {
 			if _flags[i] == 0 {
 				continue
 			}
-			// log.Println(ts.Field(i).Name)
-			// log.Println(vs.Field(i).Type().String())
-			//
 			v := vs.Field(i)
 			// log.Println(v.Kind().String())
-			switch v.Kind().String() {
-			case "uint8":
-				vs.Field(i).SetUint(uint64(ReadUint8(f.fp)))
+			switch v.Kind() {
+			case reflect.Uint8:
+				_b := f.O.ReadUint8()
+				vs.Field(i).SetUint(uint64(_b))
+				// glog.V(2).Infof("%s:%x", vs.Type().Field(i).Name, _b)
 				break
-			case "uint16":
-				vs.Field(i).SetUint(uint64(ReadUint16(f.fp)))
+			case reflect.Uint16:
+				_u16 := f.O.ReadUint16()
+				vs.Field(i).SetUint(uint64(_u16))
+				glog.V(2).Infof("%s:%#0x", vs.Type().Field(i).Name, _u16)
 				break
-			case "uint32":
-				vs.Field(i).SetUint(uint64(ReadUint32(f.fp)))
+			case reflect.Uint32:
+				_u32 := f.O.ReadUint32()
+				vs.Field(i).SetUint(uint64(_u32))
+				glog.V(2).Infof("%s:%#0x", vs.Type().Field(i).Name, _u32)
 				break
-			case "string":
-				vs.Field(i).SetString(ReadString(f.fp))
+			case reflect.String:
+				_str := f.O.ReadString()
+				vs.Field(i).SetString(_str)
+				glog.V(2).Infof("%s:%#0x", vs.Type().Field(i).Name, _str)
 				break
-			case "ptr":
-
+			case reflect.Ptr:
+				glog.V(2).Infof("###%s", vs.Type().Field(i).Name)
 				v.Set(reflect.New(v.Type().Elem()))
-				in := make([]reflect.Value, 1)
-				in[0] = reflect.ValueOf(f.fp)
-				v.MethodByName("Parsing").Call(in)
+				// glog.Info(v.Elem().FieldByName("O"))
+				v.Elem().FieldByName("O").Set(reflect.ValueOf(f.O))
+				v.MethodByName("Parsing").Call(nil)
 			default:
 				log.Panicln(ErrUnknownType)
 			}

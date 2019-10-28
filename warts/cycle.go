@@ -1,16 +1,15 @@
 package warts
 
-import (
-	// "log"
-	"io"
-)
+// "log"
 
 type CycleStartRecord struct {
-	CCycleId  uint32 `cCycleId`
-	ListId    uint32 `listId`
-	HCycleId  uint32 `hCycleId`
+	CCycleID  uint32 `cCycleId`
+	ListID    uint32 `listId`
+	HCycleID  uint32 `hCycleId`
 	StartTime uint32 `startTime`
 	Options   *CycleStartRecordOptions
+
+	O *Object
 }
 
 type CycleStartRecordOptions struct {
@@ -20,11 +19,13 @@ type CycleStartRecordOptions struct {
 
 //CycleDefinitionRecord
 type CycleDefinitionRecord struct {
-	CCycleId  uint32 `cCycleId`
-	ListId    uint32 `listId`
-	HCycleId  uint32 `hCycleId`
+	CCycleID  uint32 `cCycleId`
+	ListID    uint32 `listId`
+	HCycleID  uint32 `hCycleId`
 	StartTime uint32 `startTime`
 	Options   *CycleDefinitionRecordOptions
+
+	O *Object
 }
 
 //CycleDefinitionRecordOptions
@@ -35,57 +36,76 @@ type CycleDefinitionRecordOptions struct {
 
 //CycleStopRecord
 type CycleStopRecord struct {
-	CCycleId uint32 `cCycleId`
+	CCycleID uint32 `cCycleId`
 	StopTime uint32 `stopTime`
+
+	O *Object
 }
 
 //NewCycleStartRecord
-func NewCycleStartRecord() *CycleStartRecord {
+func NewCycleStartRecord(data []byte) *CycleStartRecord {
 	return &CycleStartRecord{
 		Options: &CycleStartRecordOptions{},
+		O:       NewObject(data),
 	}
 }
 
 //NewCycleStartRecord
-func NewCycleDefinitionRecord() *CycleDefinitionRecord {
+func NewCycleDefinitionRecord(data []byte) *CycleDefinitionRecord {
 	return &CycleDefinitionRecord{
 		Options: &CycleDefinitionRecordOptions{},
+		O:       NewObject(data),
+	}
+}
+
+//NewCycleStartRecord
+func NewCycleStopRecord(data []byte) *CycleStopRecord {
+	return &CycleStopRecord{
+		O: NewObject(data),
 	}
 }
 
 //Parsing
-func (c *CycleStartRecord) Parsing(fp io.Reader) {
+func (c *CycleStartRecord) Parsing() {
 	//cCycleId
-	c.CCycleId = ReadUint32(fp)
+	c.CCycleID = c.O.ReadUint32()
 	//listId
-	c.ListId = ReadUint32(fp)
+	c.ListID = c.O.ReadUint32()
 	//hCycleId
-	c.HCycleId = ReadUint32(fp)
+	c.HCycleID = c.O.ReadUint32()
 	//startTime
-	c.StartTime = ReadUint32(fp)
+	c.StartTime = c.O.ReadUint32()
 
 	//flags
-	flags := NewFlags(fp)
+	flags := NewFlags(c.O)
 	flags.Parsing(c.Options)
 }
 
 //Parsing
-func (c *CycleDefinitionRecord) Parsing(fp io.Reader) {
+func (c *CycleDefinitionRecord) Parsing() {
 	//cCycleId
-	c.CCycleId = ReadUint32(fp)
+	c.CCycleID = c.O.ReadUint32()
 	//listId
-	c.ListId = ReadUint32(fp)
+	c.ListID = c.O.ReadUint32()
 	//hCycleId
-	c.HCycleId = ReadUint32(fp)
+	c.HCycleID = c.O.ReadUint32()
 	//startTime
-	c.StartTime = ReadUint32(fp)
+	c.StartTime = c.O.ReadUint32()
 
 	//flags
-	flags := NewFlags(fp)
+	flags := NewFlags(c.O)
 	flags.Parsing(c.Options)
 }
 
 //Parsing
 func (c *CycleStopRecord) Parsing() {
+	//hCycleId
+	c.CCycleID = c.O.ReadUint32()
+	//startTime
+	c.StopTime = c.O.ReadUint32()
 
+	//flags
+	NewFlags(c.O)
+	// flags := NewFlags(c.O)
+	// flags.Parsing(c.Options)
 }
